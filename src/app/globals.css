@@ -165,9 +165,19 @@
 @media print {
   @page {
     /* Updated page margins for better print layout */
-    margin: 0.2cm 0cm;
+    margin: 0 !important;
     padding: 0;
-    size: A4;
+    size: A4 portrait !important;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
   
   html {

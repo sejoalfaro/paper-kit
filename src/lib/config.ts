@@ -11,7 +11,7 @@ export const appConfig = {
    */
   name: 'Paperly',
   tagline: 'by Nominar.pro',
-  description: 'Generador de facturas profesionales en PDF',
+  description: 'Paperly - Generador de facturas profesionales en PDF',
   longDescription: 'Create stunning invoices with minimalist design. Fast, simple, and open source.',
   
   /**
