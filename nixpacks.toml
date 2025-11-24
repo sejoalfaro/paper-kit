@@ -4,6 +4,10 @@ nixPkgs = ["nodejs_20", "pnpm"]
 [phases.install]
 cmds = ["pnpm install --frozen-lockfile"]
 
+[phases.chromium]
+dependsOn = ['install']
+cmds = ['npx playwright install --with-deps chromium']
+
 [phases.build]
 cmds = ["pnpm run build"]
 

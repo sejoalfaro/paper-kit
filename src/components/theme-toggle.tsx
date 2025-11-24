@@ -9,8 +9,9 @@ export function ThemeToggle() {
 
   return (
     <Button
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      variant="outline"
+    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+    variant="outline"
+    suppressHydrationWarning
     >
       {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
       {theme === "dark" ? "Modo Claro" : "Modo Oscuro"}

@@ -1,140 +1,50 @@
 "use client"
 
-import { useState } from "react"
-import { Plus, Download } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
+import { Plus } from 'lucide-react'
 import { Navbar } from '@/src/components/navbar'
 import { Footer } from '@/src/components/footer'
 import { Button } from '@/src/components/ui/button'
-import { InvoiceItem, InvoiceData } from '@/src/types/invoice'
 import { InvoiceHeader } from '@/src/components/invoice/invoice-header'
 import { InvoiceClient } from '@/src/components/invoice/invoice-client'
 import { InvoiceItemsTable } from '@/src/components/invoice/invoice-items-table'
 import { InvoiceItemsMobile } from '@/src/components/invoice/invoice-items-mobile'
 import { InvoiceSummary } from '@/src/components/invoice/invoice-summary'
-
-// Initial Data
-const initialData: InvoiceData = {
-  issuer: {
-    name: "",
-    id: "",
-    address: "",
-    phone: "",
-    email: "",
-    website: "",
-  },
-  receiver: {
-    name: "",
-    id: "",
-    address: "",
-    phone: "",
-    email: "",
-  },
-  details: {
-    number: "INV-001",
-    date: new Date().toISOString().split("T")[0],
-    dueDate: "",
-    currency: "USD",
-    notes: "",
-  },
-  items: [
-    {
-      id: "1",
-      description: "Servicios de Desarrollo Web",
-      quantity: 1,
-      price: 0,
-      taxRate: 0,
-    },
-  ],
-  discount: {
-    type: "percentage",
-    value: 0,
-  },
-}
+import { InvoiceDownloadButton } from '@/src/components/invoice/invoice-download-button'
+import { InvoiceShareButton } from '@/src/components/invoice/invoice-share-button'
+import { useInvoiceData } from '@/src/hooks/use-invoice-data'
+import { useInvoiceTheme } from '@/src/hooks/use-invoice-theme'
+import { useInvoiceCalculations } from '@/src/hooks/use-invoice-calculations'
+import { useInvoiceHandlers } from '@/src/hooks/use-invoice-handlers'
 
 export default function InvoiceGenerator() {
-  const [data, setData] = useState<InvoiceData>(initialData)
-
-  const calculateSubtotal = () => {
-    return data.items.reduce((acc, item) => acc + item.quantity * item.price, 0)
-  }
-
-  const calculateDiscount = () => {
-    const subtotal = calculateSubtotal()
-    if (data.discount.type === "percentage") {
-      return (subtotal * data.discount.value) / 100
-    }
-    return data.discount.value
-  }
-
-  const calculateTax = () => {
-    const subtotal = calculateSubtotal()
-    const discount = calculateDiscount()
-    const subtotalAfterDiscount = subtotal - discount
-    return data.items.reduce((acc, item) => {
-      const itemSubtotal = item.quantity * item.price
-      const itemProportion = subtotal > 0 ? itemSubtotal / subtotal : 0
-      const itemAfterDiscount = subtotalAfterDiscount * itemProportion
-      return acc + (itemAfterDiscount * item.taxRate) / 100
-    }, 0)
-  }
-
-  const calculateTotal = () => {
-    return calculateSubtotal() - calculateDiscount() + calculateTax()
-  }
-
-  const handleIssuerChange = (field: keyof InvoiceData["issuer"], value: string) => {
-    setData((prev) => ({ ...prev, issuer: { ...prev.issuer, [field]: value } }))
-  }
-
-  const handleReceiverChange = (field: keyof InvoiceData["receiver"], value: string) => {
-    setData((prev) => ({ ...prev, receiver: { ...prev.receiver, [field]: value } }))
-  }
-
-  const handleDetailsChange = (field: keyof InvoiceData["details"], value: string) => {
-    setData((prev) => ({ ...prev, details: { ...prev.details, [field]: value } }))
-  }
-
-  const handleDiscountChange = (field: keyof InvoiceData["discount"], value: string | number) => {
-    setData((prev) => ({ ...prev, discount: { ...prev.discount, [field]: value } }))
-  }
-
-  const handleItemChange = (id: string, field: keyof InvoiceItem, value: string | number) => {
-    setData((prev) => ({
-      ...prev,
-      items: prev.items.map((item) => (item.id === id ? { ...item, [field]: value } : item)),
-    }))
-  }
-
-  const addItem = () => {
-    const newItem: InvoiceItem = {
-      id: Math.random().toString(36).substr(2, 9),
-      description: "",
-      quantity: 1,
-      price: 0,
-      taxRate: 0,
-    }
-    setData((prev) => ({ ...prev, items: [...prev.items, newItem] }))
-  }
-
-  const removeItem = (id: string) => {
-    if (data.items.length === 1) return
-    setData((prev) => ({ ...prev, items: prev.items.filter((item) => item.id !== id) }))
-  }
-
-  const handlePrint = () => {
-    window.print()
-  }
+  const searchParams = useSearchParams()
+  const printMode = searchParams.get('print') === 'true'
+  
+  // Custom hooks para separar concerns
+  const [data, setData] = useInvoiceData()
+  useInvoiceTheme()
+  const { subtotal, discount, tax, total } = useInvoiceCalculations(data)
+  const {
+    handleIssuerChange,
+    handleReceiverChange,
+    handleDetailsChange,
+    handleDiscountChange,
+    handleItemChange,
+    addItem,
+    removeItem,
+  } = useInvoiceHandlers(setData)
 
   return (
     <>
-      <Navbar />
+      {!printMode && <Navbar />}
       <div id="invoice-page" className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 print:p-0 print:m-0 print:min-h-0 print:overflow-visible bg-background">
-        <div className="max-w-4xl mx-auto mb-6 flex justify-end no-print">
-          <Button onClick={handlePrint} size="lg">
-            <Download className="w-4 h-4" />
-            Descargar PDF
-          </Button>
-        </div>
+        {!printMode && (
+          <div className="max-w-4xl mx-auto mb-6 flex justify-end gap-3 no-print">
+            <InvoiceShareButton invoiceData={data} />
+            <InvoiceDownloadButton invoiceData={data} />
+          </div>
+        )}
 
         <div className="max-w-4xl mx-auto rounded-xl shadow-sm border overflow-hidden print:shadow-none print:border-none print:rounded-none bg-card text-card-foreground border-border">
 
@@ -174,10 +84,10 @@ export default function InvoiceGenerator() {
 
           <InvoiceSummary
             data={data}
-            subtotal={calculateSubtotal()}
-            discount={calculateDiscount()}
-            tax={calculateTax()}
-            total={calculateTotal()}
+            subtotal={subtotal}
+            discount={discount}
+            tax={tax}
+            total={total}
             onDetailsChange={handleDetailsChange}
             onDiscountChange={handleDiscountChange}
           />
@@ -189,7 +99,7 @@ export default function InvoiceGenerator() {
           </div>
         </div>
       </div>
-      <Footer />
+      {!printMode && <Footer />}
     </>
   )
 }
