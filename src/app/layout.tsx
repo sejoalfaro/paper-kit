@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/src/components/theme-provider'
 import { appConfig } from '@/src/lib/config'
 import './globals.css'
+import { Toaster } from "@/src/components/ui/sonner"
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -36,6 +37,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             {children}
+            <Toaster />
           </ThemeProvider>
           <Analytics />
         </body>

@@ -4,16 +4,17 @@ import React from 'react'
 import { Download } from 'lucide-react'
 import { Button } from '@/src/components/ui/button'
 import { InvoiceData } from '@/src/types/invoice'
+import { toast } from 'sonner'
 
-type Props = { 
+type Props = {
   invoiceData: InvoiceData
   variant?: 'default' | 'outline' | 'ghost' | 'link' | 'destructive' | 'secondary'
   size?: 'default' | 'sm' | 'lg' | 'icon'
   className?: string
 }
 
-export function InvoiceDownloadButton({ 
-  invoiceData, 
+export function InvoiceDownloadButton({
+  invoiceData,
   variant = 'default',
   size = 'lg',
   className = ''
@@ -23,14 +24,14 @@ export function InvoiceDownloadButton({
   const handleDownload = async () => {
     try {
       setLoading(true)
-      
+
       // Detectar tema actual
       const isDark = document.documentElement.classList.contains('dark')
       const theme = isDark ? 'dark' : 'light'
-      
+
       // Codificar datos en base64
       const encodedData = btoa(JSON.stringify(invoiceData))
-      
+
       const res = await fetch(`/api/invoice/pdf?data=${encodeURIComponent(encodedData)}&theme=${theme}`)
 
       if (!res.ok) {
@@ -47,17 +48,23 @@ export function InvoiceDownloadButton({
       a.click()
       a.remove()
       URL.revokeObjectURL(url)
+
+      toast.success('PDF descargado', {
+        description: 'La factura se ha descargado correctamente.',
+      })
     } catch (err) {
       console.error(err)
-      alert('No se pudo descargar el PDF. Por favor, intenta de nuevo.')
+      toast.error('Error al descargar', {
+        description: 'No se pudo descargar el PDF. Por favor, intenta de nuevo.',
+      })
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <Button 
-      onClick={handleDownload} 
+    <Button
+      onClick={handleDownload}
       disabled={loading}
       variant={variant}
       size={size}
