@@ -23,6 +23,14 @@ export const BROWSER_LAUNCH_OPTIONS: LaunchOptions = {
     '--disable-web-security', // Solo si necesitas cargar recursos externos
     '--ignore-certificate-errors', // Ignorar errores de certificados SSL
     '--ignore-certificate-errors-spki-list',
+    '--single-process', // Importante para entornos serverless/containers
+    '--disable-extensions',
+    '--disable-background-networking',
+    '--disable-default-apps',
+    '--disable-sync',
+    '--metrics-recording-only',
+    '--mute-audio',
+    '--no-default-browser-check',
   ],
 }
 
@@ -31,7 +39,7 @@ export const BROWSER_LAUNCH_OPTIONS: LaunchOptions = {
  */
 export const PAGE_GOTO_OPTIONS = {
   waitUntil: 'networkidle' as const,
-  timeout: 30000, // 30 segundos
+  timeout: 60000, // 60 segundos - aumentado para evitar timeout
 }
 
 /**
