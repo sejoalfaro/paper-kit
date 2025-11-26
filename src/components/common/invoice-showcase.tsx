@@ -58,7 +58,7 @@ export function InvoiceShowcase() {
                                         width={1240}
                                         height={1754}
                                         className="w-full h-auto"
-                                        priority
+                                        preload
                                     />
                                     <Dialog>
                                         <DialogTrigger asChild>
@@ -77,6 +77,7 @@ export function InvoiceShowcase() {
                                                 width={1240}
                                                 height={1754}
                                                 className="w-full h-auto rounded-lg"
+                                                preload
                                             />
                                         </DialogContent>
                                     </Dialog>
@@ -95,7 +96,7 @@ export function InvoiceShowcase() {
                                         width={1200}
                                         height={1600}
                                         className="w-full h-auto"
-                                        priority
+                                        preload
                                     />
                                     <Dialog>
                                         <DialogTrigger asChild>
@@ -114,6 +115,7 @@ export function InvoiceShowcase() {
                                                 width={1200}
                                                 height={1600}
                                                 className="w-full h-auto rounded-lg"
+                                                preload
                                             />
                                         </DialogContent>
                                     </Dialog>
