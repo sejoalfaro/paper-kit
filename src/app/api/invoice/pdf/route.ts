@@ -33,55 +33,19 @@ export async function GET(req: NextRequest) {
   let browser = null
 
   try {
-    console.log('[PDF Generation] Starting process...')
-    console.log('[PDF Generation] URL:', invoiceUrl)
-    console.log('[PDF Generation] Environment:', process.env.NODE_ENV)
-    
     browser = await chromium.launch(BROWSER_LAUNCH_OPTIONS)
-    console.log('[PDF Generation] Browser launched successfully')
 
     const page = await browser.newPage({
       ignoreHTTPSErrors: true,
     })
-    console.log('[PDF Generation] New page created')
 
-    // Log de eventos de la página
-    page.on('console', msg => console.log('[Browser Console]', msg.text()))
-    page.on('pageerror', error => console.error('[Browser Error]', error))
-    page.on('requestfailed', request => {
-      console.error('[Request Failed]', {
-        url: request.url(),
-        failure: request.failure()?.errorText,
-        method: request.method(),
-        resourceType: request.resourceType()
-      })
-    })
-    page.on('response', response => {
-      if (!response.ok()) {
-        console.warn('[Response Error]', {
-          url: response.url(),
-          status: response.status(),
-          statusText: response.statusText()
-        })
-      }
-    })
-
-    const startTime = Date.now()
-    console.log('[PDF Generation] Navigating to page...')
-    
     await page.goto(invoiceUrl, PAGE_GOTO_OPTIONS)
-    
-    const loadTime = Date.now() - startTime
-    console.log(`[PDF Generation] Page loaded successfully in ${loadTime}ms`)
 
     await page.waitForTimeout(STYLE_LOAD_DELAY)
-    console.log('[PDF Generation] Style delay completed')
 
     const pdfBuffer = await page.pdf(PDF_OPTIONS)
-    console.log('[PDF Generation] PDF generated successfully')
 
     await browser.close()
-    console.log('[PDF Generation] Browser closed')
 
     let invoiceNumber = 'invoice'
     try {
@@ -99,29 +63,16 @@ export async function GET(req: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[PDF Generation] ERROR:', error)
-    
-    if (error instanceof Error) {
-      console.error('[PDF Generation] Error name:', error.name)
-      console.error('[PDF Generation] Error message:', error.message)
-      console.error('[PDF Generation] Error stack:', error.stack)
-    }
+    console.error('Error generating PDF:', error)
 
     if (browser) {
-      try {
-        await browser.close()
-        console.log('[PDF Generation] Browser closed after error')
-      } catch (closeError) {
-        console.error('[PDF Generation] Error closing browser:', closeError)
-      }
+      await browser.close()
     }
 
     return new Response(
       JSON.stringify({
         error: 'Error generating PDF',
-        message: error instanceof Error ? error.message : 'Unknown error',
-        type: error instanceof Error ? error.name : 'Unknown',
-        url: invoiceUrl
+        message: error instanceof Error ? error.message : 'Unknown error'
       }),
       {
         status: 500,
