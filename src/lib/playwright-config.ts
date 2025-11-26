@@ -36,10 +36,13 @@ export const BROWSER_LAUNCH_OPTIONS: LaunchOptions = {
 
 /**
  * Opciones para navegar a la página
+ * 
+ * Usamos 'domcontentloaded' porque analytics/tracking scripts pueden
+ * fallar y nunca alcanzar 'networkidle', causando timeouts.
  */
 export const PAGE_GOTO_OPTIONS = {
-  waitUntil: 'networkidle' as const,
-  timeout: 60000, // 60 segundos - aumentado para evitar timeout
+  waitUntil: 'domcontentloaded' as const,
+  timeout: 60000, // 60 segundos
 }
 
 /**
